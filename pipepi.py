@@ -30,13 +30,16 @@ class ClientProtocol(asyncio.Protocol):
             try:
                 jsonrpc = json.loads(ajsons[beg:end+1])
             except ValueError:
+                print("--- beg {}".format(beg))
+                print("--- end {}".format(end+1))
                 print(ajsons)
+                print("---")
                 self.logger.error(data.decode())
                 msg = ' Not valid data - requires JSONRPC'
                 self.logger.error(msg)
                 self.jsonrpc_error(msg)
                 continue 
- 
+
             # TODO validation
             #
             #
