@@ -59,6 +59,13 @@ class ClientProtocol(asyncio.Protocol):
                         print(r)
                         response = '{"jsonrpc": "2.0", "id": "' + jsonrpc['id' ] + '", "result": true}'
                         self.transport.write(response.encode())
+                    elif jsonrpc['method'] == "PUT":
+                        print("URL  - {}".format(url)) 
+                        r = requests.put(url, json = jsonrpc['params']['data'])
+                        print(r)
+                        response = '{"jsonrpc": "2.0", "id": "' + jsonrpc['id' ] + '", "result": true}'
+                        self.transport.write(response.encode())
+
                 except Exception:    
                     response = '{"jsonrpc": "2.0", "id": "' + jsonrpc['id' ] + '", "error": "09", "message": "Can NOT connect to REST service"}'
                     print("Cant connect to REST service! ")
