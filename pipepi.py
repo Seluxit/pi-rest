@@ -1,4 +1,4 @@
-#!flask/bin/python	
+#!/usr/bin/python3	
 
 import asyncio
 import requests
@@ -48,15 +48,19 @@ class ClientProtocol(asyncio.Protocol):
                 return
             elif 'method' in jsonrpc:
                 # to REST
-                url = "http://127.0.0.1:5000" + jsonrpc['params']['url']
-                if jsonrpc['method'] == "POST":
-                    print("URL  - {}".format(url)) 
-                    #print("Data - {}".format(data)) 
-                    r = requests.post(url, json = jsonrpc['params']['data'])
-                    print(r)
+                try:
+                    url = "http://127.0.0.1:5000" + jsonrpc['params']['url']
+                    if jsonrpc['method'] == "POST":
+                        print("URL  - {}".format(url)) 
+                        r = requests.post(url, json = jsonrpc['params']['data'])
+                        print(r)
+                        response = '{"jsonrpc": "2.0", "id": "' + jsonrpc['id' ] + '", "result": true}'
+                except Exception:    
+                    response = '{"jsonrpc": "2.0", "id": "' + jsonrpc['id' ] + '", "error": "09", "message": "Can NOT connect to REST service"}'
+                    print("Cant connect to REST service! ")
 
-                response = '{"jsonrpc": "2.0", "id": "' + jsonrpc['id' ] + '", "result": true}'
-                self.logger.info(' < Back to client {} -- true ') #.format(self._id))
+
+                self.logger.info(' < Back to client {} -- ') #.format(self._id))
                 self.transport.write(response.encode())
             else:
                 msg = "This error message should be not seen!";
