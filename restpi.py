@@ -179,11 +179,11 @@ def update_state(network_id, device_id, value_id, state_id):
 
     # If PUT is comming from pipe (user),no need to resend back.
     base_hostname = request.url_root.split("//")[-1].split("/")[0]
-    if base_hostname != '127.0.0.1':
+    if base_hostname != '127.0.0.1:5000':
         url = '/network/' + str(network_id) + '/device/' + str(device_id) + '/value/' + str(value_id) + '/state/' + str(state_id)
         send_to_pipe('PUT', request.json, url) 
 
-    return jsonify({'state': state[0]})
+    return jsonify({'state': state[0]}), 200
 
 @app.route('/network/<uuid:network_id>/device/<uuid:device_id>/value/<uuid:value_id>/state/<uuid:state_id>/',methods=['PUT'])
 def update_state_(network_id, device_id, value_id, state_id):
@@ -201,10 +201,10 @@ def update_state2(state_id):
                     if state[':id'] == str(state_id):
                         state['data'] = request.json['data']
                         base_hostname = request.url_root.split("//")[-1].split("/")[0]
-                        if base_hostname != '127.0.0.1':
+                        if base_hostname != '127.0.0.1:5000':
                             url = '/network/' + network[':id'] + '/device/' + device[':id'] + '/value/' + value[':id'] + '/state/' + state[':id'] 
                             send_to_pipe(method='PUT', data=request.json, url=url)
-                        return jsonify({'state': state})
+                        return jsonify({'state': state}), 200
     abort(404)
 
 @app.route('/state/<uuid:state_id>/',methods=['PUT'])
