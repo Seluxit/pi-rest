@@ -249,37 +249,46 @@ def create_device(network_id):
     if len(device) != 0:
         abort(409) # already exist
 
-    name = request.json['name'] if 'name' in request.json else "" 
-    manufacturer = request.json['manufacturer'] if 'manufacturer' in request.json else ""
-    product = request.json['product'] if 'product' in request.json else ""
-    version = request.json['version'] if 'version' in request.json else ""
-    serial = request.json['serial'] if 'serial' in request.json else ""
-    description = request.json['description'] if 'description' in request.json else ""
-    protocol = request.json['protocol'] if 'protocol' in request.json else ""
-    communication = request.json['communication'] if 'communication' in request.json else ""
-    included = request.json['included'] if 'included' in request.json else ""
-
     device = {
         ':id': request.json[':id'],
         ':type': request.json[':type'],
-        'name': name,
-        'manufacturer': manufacturer,
-        'product': product,
-        'version': version,
-        'serial': serial,
-        'description': description,
-        'protocol': protocol,
-        'communication': communication,
-        'included': included,
         'value': []
     }
+
+    if 'name' in request.json:
+        device['name'] = request.json['name'] 
+
+    if 'manufacturer' in request.json:
+        device['manufacturer'] = request.json['manufacturer'] 
+
+    if 'product' in request.json:
+        device['product'] = request.json['product']
+
+    if 'version' in request.json:
+        device['version'] = request.json['version']
+
+    if 'serial' in request.json:
+        device['serial'] = request.json['serial']
+
+    if 'description' in request.json:
+        device['description'] = request.json['description']
+
+    if 'protocol' in request.json:
+        device['protocol'] = request.json['protocol']
+
+    if 'communication' in request.json:
+        device['communication'] = request.json['communication'] 
+
+    if 'included' in request.json:
+        device['included'] = request.json['included']
+
     net[0]['device'].append(device)
     return jsonify({'device': device}), 201
+
 
 @app.route('/network/<uuid:network_id>/device/', methods=['POST'])
 def create_device_(network_id):
     return create_device(network_id)
-
 
 
 @app.route('/network/<uuid:network_id>/device/<uuid:device_id>/value', methods=['POST'])
@@ -297,9 +306,7 @@ def create_value(network_id, device_id):
     if len(value) != 0:
         abort(409) # already exist
 
-    name = request.json['name'] if 'name' in request.json else ''
     permission = request.json['permission'] if 'permission' in request.json else ''
-    value_type = request.json['type'] if 'type' in request.json else ''
     number = request.json['number'] if 'number' in request.json else ''
     if number:
         number_min = request.json['number']['min']
@@ -307,14 +314,10 @@ def create_value(network_id, device_id):
         number_step = request.json['number']['step']
         number_unit = request['number']['unit'] if 'unit' in request.json['number'] else ''
 
-    #string = request.json['string'] if 'string' in request.json else ''
-    # TODO
     value = {
         ':id': request.json[':id'],
         ':type':  request.json[':type'],
-        'name': name,
         'permission': permission,
-        'type': value_type,
         'number': {
             'min': number_min,
             'max': number_max,
@@ -323,6 +326,13 @@ def create_value(network_id, device_id):
         },
         'state': []
     }
+
+    if 'name' in request.json:
+        value['name'] = request.json['name'] 
+
+    if 'type' in request.json:
+        value['type'] = request.json['type'] 
+
     device[0]['value'].append(value)
     return jsonify({'value': value}), 201
 
