@@ -21,6 +21,9 @@ class ClientProtocol(asyncio.Protocol):
         ajsons = data.decode()
         d = self.find_jsons(ajsons)
         if d is None:
+            print("---")
+            print(ajsons)
+            print("---")
             error = 'Error : Incorrect json. Check data you are sending.'
             self.logger.error(error)
             self.jsonrpc_error(error)
@@ -150,9 +153,9 @@ def start_pipepi():
 
         client = ClientProtocol()
 
-        client_coro = loop.create_server(lambda: client, '127.0.0.1', 21004)
-        print(' Client listener started on: {} and port {}'.format('127.0.0.1', 21004))
-        logger.info(' Client listener started on: {} and port {}'.format('127.0.0.1', 21004))
+        client_coro = loop.create_server(lambda: client, '0.0.0.0', 21004)
+        print(' Client listener started on: {} and port {}'.format('0.0.0.0', 21004))
+        logger.info(' Client listener started on: {} and port {}'.format('0.0.0.0', 21004))
         logger.info('')
 
 

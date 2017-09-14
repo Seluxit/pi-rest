@@ -306,26 +306,32 @@ def create_value(network_id, device_id):
     if len(value) != 0:
         abort(409) # already exist
 
+
     permission = request.json['permission'] if 'permission' in request.json else ''
+    value = {
+        ':id': request.json[':id'],
+        ':type':  request.json[':type'],
+        'permission': permission,
+        'state': []
+    }
+
     number = request.json['number'] if 'number' in request.json else ''
     if number:
         number_min = request.json['number']['min']
         number_max = request.json['number']['max']
         number_step = request.json['number']['step']
         number_unit = request['number']['unit'] if 'unit' in request.json['number'] else ''
-
-    value = {
-        ':id': request.json[':id'],
-        ':type':  request.json[':type'],
-        'permission': permission,
-        'number': {
-            'min': number_min,
-            'max': number_max,
-            'step': number_step,
-            'unit': number_unit
-        },
-        'state': []
-    }
+        
+        value['number'] = {}
+        value['number']['min'] = number_min
+        value['number']['max'] = number_min
+        value['number']['step'] = number_min
+        value['number']['unit'] = number_min
+    
+    string = request.json['string'] if 'string' in request.json else ''
+    if string:
+        value['string'] = {}
+        value['string']['max'] = request.json['string']['max']
 
     if 'name' in request.json:
         value['name'] = request.json['name'] 
