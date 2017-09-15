@@ -212,15 +212,72 @@ def update_state2_(state_id):
     return update_state2(state_id)
 
 
+@app.route('/network/<uuid:network_id>/device/<uuid:device_id>',methods=['PUT'])
+def update_device(network_id, device_id):
+    if not request.json:
+        abort(400)
+    if not ':id' in request.json or not ':type' in request.json or not 'included' in request.json:
+        abort(400)
+
+    net = [net for net in networks if net[':id'] == str(network_id)]
+    if len(net) == 0:
+        abort(404)
+    device = [device for device in net[0]['device'] if device[':id'] == str(device_id)]
+    if len(device) == 0:
+        abort(404)
+
+    device[0]['included'] = request.json['included']
+
+    # If PUT is comming from pipe (user),no need to resend back.
+    base_hostname = request.url_root.split("//")[-1].split("/")[0]
+    if base_hostname != '127.0.0.1:5000':
+        url = '/network/' + str(network_id) + '/device/' + str(device_id)
+        send_to_pipe('PUT', request.json, url) 
+
+    return jsonify({'device': device[0]}), 200
+
+@app.route('/network/<uuid:network_id>/device/<uuid:device_id>/',methods=['PUT'])
+def update_device_(network_id, device_id):
+    return update_device(network_id, device_id)
+
+
+@app.route('/device/<uuid:device_id>',methods=['PUT'])
+def update_device2(device_id):
+    if not ':id' in request.json or not ':type' in request.json or not 'included' in request.json:
+        abort(400)
+    for network in networks:
+        for device in network['device']:
+            if device[':id'] == str(device_id):
+                device['included'] = request.json['included']
+                base_hostname = request.url_root.split("//")[-1].split("/")[0]
+                if base_hostname != '127.0.0.1:5000':
+                    url = '/network/' + network[':id'] + '/device/' + device[':id'] 
+                    send_to_pipe(method='PUT', data=request.json, url=url)
+                return jsonify({'device': device}), 200
+    abort(404)
+
+@app.route('/device/<uuid:device_id>/',methods=['PUT'])
+def update_device2_(device_id):
+    return update_device2(device_id)
+
+
+
 ### --------------- POST -------------------------
+##
+##
 @app.route('/network', methods=['POST'])
 def create_network():
     if not request.json:
-        print('It iss not a JSON')
+        print('It is not a JSON')
         abort(400)
     if not ':id' in request.json or not ':type' in request.json:
         print('Missing ":id" or ":type" in JSON request')
         abort(400)
+    
+    network = [network for network in networks if network[':id'] == request.json[':id']]
+    if len(network) != 0:
+        abort(409) # already exist
+
     network = {
         ':id': request.json[':id'],
         ':type': request.json[':type'],
