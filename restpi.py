@@ -309,7 +309,8 @@ def create_device(network_id):
     device = {
         ':id': request.json[':id'],
         ':type': request.json[':type'],
-        'value': []
+        'value': [],
+        'status': []
     }
 
     if 'name' in request.json:
@@ -374,16 +375,12 @@ def create_value(network_id, device_id):
 
     number = request.json['number'] if 'number' in request.json else ''
     if number:
-        number_min = request.json['number']['min']
-        number_max = request.json['number']['max']
-        number_step = request.json['number']['step']
-        number_unit = request['number']['unit'] if 'unit' in request.json['number'] else ''
-        
         value['number'] = {}
-        value['number']['min'] = number_min
-        value['number']['max'] = number_min
-        value['number']['step'] = number_min
-        value['number']['unit'] = number_min
+        value['number']['min'] = request.json['number']['min']
+        value['number']['max'] = request.json['number']['max']
+        value['number']['step'] = request.json['number']['step']
+        value['number']['unit'] = request.json['number']['unit'] if 'unit' in request.json['number'] else ''
+
     
     string = request.json['string'] if 'string' in request.json else ''
     if string:
@@ -432,6 +429,40 @@ def create_state(network_id, device_id, value_id):
 def create_state_(network_id, device_id, value_id):
     return create_state(network_id, device_id, value_id)
 
+
+
+@app.route('/network/<uuid:network_id>/device/<uuid:device_id>/status', methods=['POST'])
+def create_status(network_id, device_id):
+    if not request.json:
+        print('It is not a JSON')
+        abort(400)
+    if not ':id' in request.json or not ':type' in request.json:
+        print('Missing ":id" or ":type" in JSON request')
+        abort(400)
+    net = [net for net in networks if net[':id'] == str(network_id)]
+    if len(net) == 0:
+        abort(404)
+    device = [device for device in net[0]['device'] if device[':id'] == str(device_id)]
+    if len(device) == 0:
+        abort(404)
+    
+    status = {
+        ':id': request.json[':id'],
+        ':type': request.json[':type'],
+        'level': request.json['level'],
+        'type': request.json['type'],
+        'message': request.json['message'], 
+        'timestamp': request.json['timestamp'] 
+    }
+    status['data'] = request.json['data'] if 'data' in request.json else ''
+    device[0]['status'].append(status)
+
+    return jsonify({'status': status}), 201
+
+
+@app.route('/network/<uuid:network_id>/device/<uuid:device_id>/status/', methods=['POST'])
+def create_status_(network_id, device_id):
+    return create_status(network_id, device_id) 
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
